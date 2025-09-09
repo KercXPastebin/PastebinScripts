@@ -1,0 +1,136 @@
+-- Подключаем WindUI (замени URL на рабочий)
+local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/WindUI/main/WindUI.lua"))()
+
+-- Главное окно
+local Window = WindUI:CreateWindow({
+    Title = "KercX",
+    Icon = "rbxassetid://6031071993", -- круглая иконка, можно заменить на дверь
+    Author = "Kerc912",
+    Folder = "KercXGUI",
+    Size = UDim2.fromOffset(550, 450),
+    Transparent = false,
+    Theme = "Dark",
+    Resizable = true
+})
+
+-- === Tabs / Категории ===
+local PlayerTab = Window:CreateTab("Player")
+local CombatTab = Window:CreateTab("Combat")
+local MiscTab = Window:CreateTab("Misc")
+
+-- === Player Tab ===
+PlayerTab:CreateToggle({
+    Name = "Speed +200",
+    Default = false,
+    Callback = function(state)
+        local plr = game.Players.LocalPlayer
+        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            if state then
+                plr.Character.Humanoid.WalkSpeed = 200
+            else
+                plr.Character.Humanoid.WalkSpeed = 16
+            end
+        end
+    end
+})
+
+PlayerTab:CreateToggle({
+    Name = "Jump Power +200",
+    Default = false,
+    Callback = function(state)
+        local plr = game.Players.LocalPlayer
+        if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+            if state then
+                plr.Character.Humanoid.JumpPower = 200
+            else
+                plr.Character.Humanoid.JumpPower = 50
+            end
+        end
+    end
+})
+
+-- === Combat Tab ===
+CombatTab:CreateButton({
+    Name = "Load Aimbot Script",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastefy.app/k1Ew1oQ9/raw", true))()
+    end
+})
+
+-- === Misc Tab ===
+MiscTab:CreateToggle({
+    Name = "Fly",
+    Default = false,
+    Callback = function(state)
+        if state then
+            print("Fly ON") -- здесь можно вставить скрипт полета
+        else
+            print("Fly OFF")
+        end
+    end
+})
+
+MiscTab:CreateToggle({
+    Name = "Noclip",
+    Default = false,
+    Callback = function(state)
+        local plr = game.Players.LocalPlayer
+        local conn
+        if state then
+            conn = game:GetService("RunService").Stepped:Connect(function()
+                if plr.Character then
+                    for _, part in pairs(plr.Character:GetChildren()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        else
+            if conn then conn:Disconnect() end
+        end
+    end
+})
+
+MiscTab:CreateToggle({
+    Name = "Infinity Jump",
+    Default = false,
+    Callback = function(state)
+        local plr = game.Players.LocalPlayer
+        local jumpConn
+        if state then
+            jumpConn = game:GetService("UserInputService").JumpRequest:Connect(function()
+                if plr.Character and plr.Character:FindFirstChild("Humanoid") then
+                    plr.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                end
+            end)
+        else
+            if jumpConn then jumpConn:Disconnect() end
+        end
+    end
+})
+
+-- === OpenButton KercX ===
+local OpenButton = Instance.new("TextButton")
+OpenButton.Size = UDim2.new(0, 120, 0, 40)
+OpenButton.Position = UDim2.new(0, 20, 0, 20)
+OpenButton.Text = "KercX"
+OpenButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+OpenButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenButton.TextScaled = true
+OpenButton.Parent = game.CoreGui
+
+-- Иконка двери / круга
+local Icon = Instance.new("ImageLabel")
+Icon.Size = UDim2.new(0, 30, 0, 30)
+Icon.Position = UDim2.new(0, 5, 0, 5)
+Icon.Image = "rbxassetid://6031071993" -- можно заменить на другую иконку
+Icon.BackgroundTransparency = 1
+Icon.Parent = OpenButton
+
+-- Функция открытия/закрытия GUI
+local guiVisible = false
+OpenButton.MouseButton1Click:Connect(function()
+    guiVisible = not guiVisible
+    Window:SetVisible(guiVisible)
+end)
