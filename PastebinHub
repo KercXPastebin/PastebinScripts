@@ -1,0 +1,180 @@
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+-- 🪟 Окно
+local Window = WindUI:CreateWindow({
+    Title = "PastebinHub",
+    Icon = "star",
+    Author = "https://discord.gg/FYTppf24",
+    Folder = "Pastebins",
+    Size = UDim2.fromOffset(150, 150),
+})
+
+Window:EditOpenButton({
+    Title = "Open PastebinHub",
+    Icon = "circle",
+    CornerRadius = UDim.new(0,0),
+    StrokeThickness = 2,
+    Color = ColorSequence.new(
+        Color3.fromHex("8B4513"),
+        Color3.fromHex("FFFFFF")
+    )
+})
+
+-- 📂 Категории
+local PlayerTab = Window:CreateTab({ Title = "Player", Icon = "user" })
+local ModeTab = Window:CreateTab({ Title = "Mode", Icon = "slice" })
+local SettingsTab = Window:CreateTab({ Title = "Settings", Icon = "settings" })
+local InkTab = Window:CreateTab({ Title = "INK|GAME", Icon = "cat" })
+local ServerTab = Window:CreateTab({ Title = "Server", Icon = "star" })
+
+-- 🟢 Версия внизу
+local VersionLabel = Instance.new("TextLabel")
+VersionLabel.Size = UDim2.new(0, 120, 0, 30)
+VersionLabel.Position = UDim2.new(0.5, -60, 1, -40)
+VersionLabel.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+VersionLabel.Text = "v7.35.56"
+VersionLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+VersionLabel.TextScaled = true
+VersionLabel.Font = Enum.Font.SourceSansBold
+VersionLabel.Parent = Window.UI
+
+-------------------------------------------------
+-- ⚡ Player
+-------------------------------------------------
+PlayerTab:Toggle({
+    Title = "WalkSpeed +250",
+    Default = false,
+    Callback = function(state)
+        local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum.WalkSpeed = state and 250 or 16 end
+    end
+})
+
+PlayerTab:Toggle({
+    Title = "JumpPower +250",
+    Default = false,
+    Callback = function(state)
+        local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum.JumpPower = state and 250 or 50 end
+    end
+})
+
+PlayerTab:Toggle({
+    Title = "Infinite Jump",
+    Default = false,
+    Callback = function(state)
+        _G.InfiniteJump = state
+        game:GetService("UserInputService").JumpRequest:Connect(function()
+            if _G.InfiniteJump then
+                game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+            end
+        end)
+    end
+})
+
+PlayerTab:Toggle({
+    Title = "Noclip",
+    Default = false,
+    Callback = function(state)
+        _G.Noclip = state
+        game:GetService("RunService").Stepped:Connect(function()
+            if _G.Noclip then
+                for _, v in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then v.CanCollide = false end
+                end
+            end
+        end)
+    end
+})
+
+-------------------------------------------------
+-- ⚡ Mode
+-------------------------------------------------
+ModeTab:Toggle({
+    Title = "GodMode",
+    Default = false,
+    Callback = function(state)
+        local hum = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then
+            if state then
+                hum.MaxHealth = math.huge
+                hum.Health = math.huge
+            else
+                hum.MaxHealth = 100
+                hum.Health = 100
+            end
+        end
+    end
+})
+
+ModeTab:Button({
+    Title = "Linux Mode (Fake Keyboard)",
+    Desc = "Открывает имитацию терминала",
+    Callback = function()
+        local ScreenGui = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
+        local Frame = Instance.new("Frame", ScreenGui)
+        Frame.Size = UDim2.new(0.5,0,0.5,0)
+        Frame.Position = UDim2.new(0.25,0,0.25,0)
+        Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+
+        local TextLabel = Instance.new("TextLabel", Frame)
+        TextLabel.Size = UDim2.new(1,0,1,0)
+        TextLabel.Text = "Linux Terminal Simulation...\n>_"
+        TextLabel.TextColor3 = Color3.fromRGB(0,255,0)
+        TextLabel.TextScaled = true
+        TextLabel.BackgroundTransparency = 1
+    end
+})
+
+-------------------------------------------------
+-- ⚡ Settings
+-------------------------------------------------
+SettingsTab:Toggle({
+    Title = "AntiAFK",
+    Default = true,
+    Callback = function(state)
+        if state then
+            local vu = game:GetService("VirtualUser")
+            game.Players.LocalPlayer.Idled:Connect(function()
+                vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+                task.wait(1)
+                vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+            end)
+        end
+    end
+})
+
+-------------------------------------------------
+-- ⚡ INK|GAME
+-------------------------------------------------
+InkTab:Button({
+    Title = "TP To End (Red Light, Green Light)",
+    Callback = function()
+        local lp = game.Players.LocalPlayer
+        if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+            lp.Character.HumanoidRootPart.CFrame = CFrame.new(Vector3.new(0, 0, 500)) -- пример координат
+        end
+    end
+})
+
+-------------------------------------------------
+-- ⚡ Server
+-------------------------------------------------
+ServerTab:Button({
+    Title = "Skeleton Skybox",
+    Desc = "Меняет фон на Skeleton",
+    Callback = function()
+        local work = game.Workspace:GetDescendants()
+        local pic = "http://www.roblox.com/asset/?id=103555910860905"
+        for _, v in pairs(work) do
+            if v:IsA("Part") or v:IsA("UnionOperation") then
+                for _,face in pairs({"Back","Bottom","Front","Left","Right","Top"}) do
+                    local a = Instance.new("Decal")
+                    a.Face = Enum.NormalId[face]
+                    a.Texture = pic
+                    a.Parent = v
+                end
+            end
+        end
+    end
+})
