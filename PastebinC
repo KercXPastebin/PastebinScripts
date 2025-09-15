@@ -1,0 +1,192 @@
+-- ===============================
+-- Загрузка WindUI
+-- ===============================
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+-- Создаем окно
+local Window = WindUI:CreateWindow({
+    Title = "Pastebin C",
+    Icon = "tree",
+    Author = "PastebinsScripts",
+    Folder = "Pastebins",
+    Size = UDim2.fromOffset(520, 380),
+    Theme = "Dark",
+    Resizable = true,
+    SideBarWidth = 180
+})
+
+-- Цветовая схема (синий + чёрный)
+WindUI:SetTheme({
+    Background = Color3.fromRGB(0, 0, 0),
+    Topbar = Color3.fromRGB(0, 0, 0),
+    TabBackground = Color3.fromRGB(10, 10, 30),
+    SectionBackground = Color3.fromRGB(15, 15, 40),
+    TextColor = Color3.fromRGB(0, 170, 255),
+    Accent = Color3.fromRGB(0, 85, 170)
+})
+
+-- ===============================
+-- Вкладка Main
+-- ===============================
+local MainTab = Window:Tab({Title = "Main", Icon = "home"})
+
+-- Создаём скрытый фрейм для Pastebin
+local PasteFrame = Instance.new("Frame")
+PasteFrame.Size = UDim2.new(0, 400, 0, 250)
+PasteFrame.Position = UDim2.new(0.5, -200, 0.5, -125)
+PasteFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+PasteFrame.Visible = false
+PasteFrame.Parent = game:GetService("CoreGui")
+
+-- UiCorner
+local corner = Instance.new("UICorner", PasteFrame)
+corner.CornerRadius = UDim.new(0, 10)
+
+-- Заголовок фрейма
+local Title = Instance.new("TextLabel")
+Title.Text = "Pastebin C"
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundColor3 = Color3.fromRGB(0, 85, 170)
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+Title.Parent = PasteFrame
+
+-- Текстовое поле
+local TextBox = Instance.new("TextBox")
+TextBox.Size = UDim2.new(1, -10, 1, -40)
+TextBox.Position = UDim2.new(0, 5, 0, 35)
+TextBox.Text = "Тут можно вставить код из Pastebin..."
+TextBox.TextColor3 = Color3.fromRGB(0, 170, 255)
+TextBox.BackgroundColor3 = Color3.fromRGB(15, 15, 40)
+TextBox.ClearTextOnFocus = false
+TextBox.MultiLine = true
+TextBox.TextWrapped = true
+TextBox.TextXAlignment = Enum.TextXAlignment.Left
+TextBox.TextYAlignment = Enum.TextYAlignment.Top
+TextBox.Font = Enum.Font.Code
+TextBox.TextSize = 14
+local corner2 = Instance.new("UICorner", TextBox)
+corner2.CornerRadius = UDim.new(0, 6)
+TextBox.Parent = PasteFrame
+
+-- Кнопка OPEN PASTEBIN C
+MainTab:Button({
+    Title = "OPEN PASTEBIN C",
+    Icon = "point-right",
+    Desc = "Открыть фрейм с Pastebin",
+    Callback = function()
+        PasteFrame.Visible = not PasteFrame.Visible
+    end
+})
+
+-- ===============================
+-- Вкладка Teleports
+-- ===============================
+local Teleports = Window:Tab({Title = "Teleports", Icon = "map"})
+
+-- Функция телепортации к модели/части
+local function teleportTo(part)
+    local player = game.Players.LocalPlayer
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = part.CFrame + Vector3.new(0,5,0)
+    end
+end
+
+-- Кнопки для всех моделей в workspace
+for _, obj in pairs(workspace:GetChildren()) do
+    if obj:IsA("Model") then
+        local part = obj.PrimaryPart or obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChildWhichIsA("BasePart")
+        if part then
+            Teleports:Button({
+                Title = obj.Name,
+                Desc = "Телепорт к " .. obj.Name,
+                Callback = function()
+                    teleportTo(part)
+                end
+            })
+        end
+    end
+end
+
+-- ===============================
+-- Bring Items
+-- ===============================
+local function bringItems()
+    local player = game.Players.LocalPlayer
+    if not (player.Character and player.Character:FindFirstChild("HumanoidRootPart")) then return end
+    local hrp = player.Character.HumanoidRootPart
+    for _, obj in pairs(workspace:GetChildren()) do
+        if obj:IsA("Model") or obj:IsA("Part") then
+            local part = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+            if part then
+                part.CFrame = hrp.CFrame + Vector3.new(math.random(-5,5), 3, math.random(-5,5))
+            end
+        end
+    end
+end
+
+-- Кнопка Bring Items
+Teleports:Button({
+    Title = "Bring Items",
+    Desc = "Притянуть все предметы к себе",
+    Callback = function()
+        bringItems()
+        WindUI:Notify({Title = "Bring Items", Content = "Все предметы перемещены к тебе!", Duration = 4})
+    end
+})
+
+-- Авто Bring Items
+local autoBring = false
+local bringDelay = 5 -- задержка в секундах
+
+Teleports:Toggle({
+    Title = "Auto Bring Items",
+    Default = false,
+    Callback = function(state)
+        autoBring = state
+        if state then
+            WindUI:Notify({Title = "Auto Bring Items", Content = "Авто притягивание включено!", Duration = 4})
+            task.spawn(function()
+                while autoBring do
+                    bringItems()
+                    task.wait(bringDelay)
+                end
+            end)
+        else
+            WindUI:Notify({Title = "Auto Bring Items", Content = "Авто притягивание выключено.", Duration = 4})
+        end
+    end
+})
+
+-- ===============================
+-- Вкладка LocalPlayer
+-- ===============================
+local PlayerTab = Window:Tab({Title = "LocalPlayer", Icon = "user"})
+
+-- WalkSpeed
+PlayerTab:Slider({
+    Title = "WalkSpeed",
+    Description = "Скорость передвижения",
+    Default = 16,
+    Min = 16,
+    Max = 100,
+    Callback = function(val)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = val
+    end
+})
+
+-- JumpPower
+PlayerTab:Slider({
+    Title = "JumpPower",
+    Description = "Высота прыжка",
+    Default = 50,
+    Min = 50,
+    Max = 200,
+    Callback = function(val)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = val
+    end
+})
+
+-- Открыть вкладку Main по умолчанию
+Window:SelectTab(1)
